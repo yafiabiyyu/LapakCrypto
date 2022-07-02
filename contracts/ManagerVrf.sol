@@ -10,6 +10,8 @@ contract ManagerVrf is Ownable {
     LinkTokenInterface linkToken;
     uint64 private subscriptionId;
 
+    mapping(address => bool) public subScriptionStatus;
+
     constructor(address _coordinator, address _linkToken) {
         coordinator = VRFCoordinatorV2Interface(_coordinator);
         linkToken = LinkTokenInterface(_linkToken);
@@ -35,19 +37,28 @@ contract ManagerVrf is Ownable {
     }
 
     function addConsumer(address consumerAddress) external onlyOwner {
+        require(consumerAddress != address(0));
+        require(!subScriptionStatus[consumerAddress]);
         coordinator.addConsumer(subscriptionId, consumerAddress);
+        subScriptionStatus[consumerAddress] = true;
     }
 
     function removeConsumer(address consumerAddress) external onlyOwner {
+        require(consumerAddress != address(0));
+        require(subScriptionStatus[consumerAddress]);
         coordinator.removeConsumer(subscriptionId, consumerAddress);
+        subScriptionStatus[consumerAddress] = false;
     }
 
     function cancelSubscription(address receivingWallet) external onlyOwner {
+        require(receivingWallet != address(0));
         coordinator.cancelSubscription(subscriptionId, receivingWallet);
         subscriptionId = 0;
     }
 
     function withdraw(uint256 amount, address to) external onlyOwner {
+        require(to != address(0));
+        require(amount > 0);
         linkToken.transfer(to, amount);
     }
 
