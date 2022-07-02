@@ -2,10 +2,13 @@ from brownie import accounts, config, network, MyToken
 
 
 def get_account():
-    account = accounts.from_mnemonic(
-        mnemonic=config["wallets"]["from_mnemonic"], count=3
-    )
-    return account
+    if network.show_active() == "mainnet-fork":
+        return accounts
+    else:
+        account = accounts.from_mnemonic(
+            mnemonic=config['wallets']["from_menemonic"], count=5
+        )
+        return account
 
 
 def deploy_mocks(name, symbol, totalSupply):
